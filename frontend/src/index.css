@@ -1,16 +1,1 @@
-/* Global reset Tailwind directives removed since Tailwind is not installed.
-   If you want Tailwind later, run: npm install -D tailwindcss && npx tailwindcss init
-   and add the directives back. For now plain CSS is used throughout. */
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-  font-family: system-ui, -apple-system, sans-serif;
-  background: #f4f7f6;
-}
+@import "tailwindcss";

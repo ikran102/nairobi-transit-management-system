@@ -1,11 +1,21 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  Search,
+  Plus,
+  Pencil,
+  Trash2,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
+
 import AdminLayout from "../layouts/AdminLayout";
-import "../styles/ViewRoutes.css";
 
 function ViewRoutes() {
   const [routes, setRoutes] = useState([]);
+  const [filteredRoutes, setFilteredRoutes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
   const navigate = useNavigate();
 
@@ -13,27 +23,33 @@ function ViewRoutes() {
     fetchRoutes();
   }, []);
 
-  // Fetch all routes
+  useEffect(() => {
+    const filtered = routes.filter((route) =>
+      route.name.toLowerCase().includes(search.toLowerCase()) ||
+      route.origin.toLowerCase().includes(search.toLowerCase()) ||
+      route.destination.toLowerCase().includes(search.toLowerCase())
+    );
+
+    setFilteredRoutes(filtered);
+  }, [search, routes]);
+
   const fetchRoutes = async () => {
     try {
       const response = await fetch("http://127.0.0.1:5000/api/routes");
       const data = await response.json();
 
       setRoutes(data);
+      setFilteredRoutes(data);
       setLoading(false);
+
     } catch (error) {
-      console.error("Error loading routes:", error);
+      console.error(error);
       setLoading(false);
     }
   };
 
-  // Delete a route
   const deleteRoute = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this route?"
-    );
-
-    if (!confirmDelete) return;
+    if (!window.confirm("Delete this route?")) return;
 
     try {
       const response = await fetch(
@@ -46,74 +62,186 @@ function ViewRoutes() {
       const data = await response.json();
 
       if (!response.ok) {
-        alert(data.error || "Failed to delete route.");
+        alert(data.error);
         return;
       }
 
-      alert(data.message);
-
-      // Refresh the routes list
       fetchRoutes();
 
-    } catch (error) {
-      console.error("Error deleting route:", error);
-      alert("Something went wrong.");
+    } catch (err) {
+      console.error(err);
     }
   };
 
   return (
     <AdminLayout>
-      <div className="table-container">
-        <h1>All Routes</h1>
 
-        {loading ? (
-          <p>Loading routes...</p>
-        ) : (
-          <table>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Route</th>
-                <th>Origin</th>
-                <th>Destination</th>
-                <th>Operating Hours</th>
-                <th>Verified</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
+      <div className="space-y-8">
 
-            <tbody>
-              {routes.map((route) => (
-                <tr key={route.id}>
-                  <td>{route.id}</td>
-                  <td>{route.name}</td>
-                  <td>{route.origin}</td>
-                  <td>{route.destination}</td>
-                  <td>{route.operating_hours}</td>
-                  <td>{route.verified ? "✅" : "❌"}</td>
+        <div className="flex justify-between items-center">
 
-                  <td>
-                    <button
-                      className="edit-btn"
-                      onClick={() => navigate(`/routes/edit/${route.id}`)}
+          <div>
+
+            <h1 className="text-4xl font-bold">
+              Routes
+            </h1>
+
+            <p className="text-gray-500 mt-2">
+              View and manage all transport routes.
+            </p>
+
+          </div>
+
+          <button
+            onClick={() => navigate("/routes/add")}
+            className="bg-green-700 text-white px-5 py-3 rounded-xl hover:bg-green-800 transition flex items-center gap-2"
+          >
+            <Plus size={18} />
+            Add Route
+          </button>
+
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-sm border p-6">
+
+          <div className="relative mb-6">
+
+            <Search
+              className="absolute left-4 top-3.5 text-gray-400"
+              size={18}
+            />
+
+            <input
+              type="text"
+              placeholder="Search routes..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full md:w-96 pl-11 pr-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-green-700"
+            />
+
+          </div>
+
+          {loading ? (
+
+            <p>Loading...</p>
+
+          ) : (
+
+            <div className="overflow-x-auto">
+
+              <table className="w-full">
+
+                <thead className="bg-gray-100">
+
+                  <tr>
+
+                    <th className="text-left p-4">ID</th>
+                    <th className="text-left p-4">Route</th>
+                    <th className="text-left p-4">Origin</th>
+                    <th className="text-left p-4">Destination</th>
+                    <th className="text-left p-4">Operating Hours</th>
+                    <th className="text-left p-4">Status</th>
+                    <th className="text-left p-4">Actions</th>
+
+                  </tr>
+
+                </thead>
+
+                <tbody>
+
+                  {filteredRoutes.map((route) => (
+
+                    <tr
+                      key={route.id}
+                      className="border-b hover:bg-gray-50 transition"
                     >
-                      Edit
-                    </button>
 
-                    <button
-                      className="delete-btn"
-                      onClick={() => deleteRoute(route.id)}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+                      <td className="p-4">{route.id}</td>
 
-          </table>
-        )}
+                      <td className="p-4 font-semibold">
+                        {route.name}
+                      </td>
+
+                      <td className="p-4">
+                        {route.origin}
+                      </td>
+
+                      <td className="p-4">
+                        {route.destination}
+                      </td>
+
+                      <td className="p-4">
+                        {route.operating_hours}
+                      </td>
+
+                      <td className="p-4">
+
+                        {route.verified ? (
+
+                          <span className="inline-flex items-center gap-2 bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">
+
+                            <CheckCircle size={16} />
+
+                            Verified
+
+                          </span>
+
+                        ) : (
+
+                          <span className="inline-flex items-center gap-2 bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm">
+
+                            <XCircle size={16} />
+
+                            Pending
+
+                          </span>
+
+                        )}
+
+                      </td>
+
+                      <td className="p-4">
+
+                        <div className="flex gap-3">
+
+                          <button
+                            onClick={() =>
+                              navigate(`/routes/edit/${route.id}`)
+                            }
+                            className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-lg transition"
+                          >
+                            <Pencil size={18} />
+                          </button>
+
+                          <button
+                            onClick={() =>
+                              deleteRoute(route.id)
+                            }
+                            className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+
+                        </div>
+
+                      </td>
+
+                    </tr>
+
+                  ))}
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          )}
+
+        </div>
+
       </div>
+
     </AdminLayout>
   );
 }

@@ -29,16 +29,36 @@ class Route(db.Model):
     __tablename__ = "routes"
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(120), nullable=False)        # e.g. "Route 46"
-    origin = db.Column(db.String(120), nullable=False)       # e.g. "Nairobi CBD"
-    destination = db.Column(db.String(120), nullable=False)  # e.g. "Rongai"
-    operating_hours = db.Column(db.String(80), nullable=True)  # e.g. "5:00 AM - 10:00 PM"
-    verified = db.Column(db.Boolean, default=False)  # true once community-confirmed
+
+    # Basic route information
+    name = db.Column(db.String(120), nullable=False)
+    origin = db.Column(db.String(120), nullable=False)
+    destination = db.Column(db.String(120), nullable=False)
+    operating_hours = db.Column(db.String(80), nullable=True)
+    verified = db.Column(db.Boolean, default=False)
+
+    # Map information
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
+
+    # Passenger information
+    estimated_time = db.Column(db.String(50), nullable=True)
+
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    stops = db.relationship("Stop", backref="route", lazy=True, order_by="Stop.sequence")
-    fares = db.relationship("Fare", backref="route", lazy=True)
+    # Relationships
+    stops = db.relationship(
+        "Stop",
+        backref="route",
+        lazy=True,
+        order_by="Stop.sequence"
+    )
 
+    fares = db.relationship(
+        "Fare",
+        backref="route",
+        lazy=True
+    )
 
 class Stop(db.Model):
     __tablename__ = "stops"
