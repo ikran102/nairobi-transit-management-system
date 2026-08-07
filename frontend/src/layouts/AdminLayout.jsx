@@ -1,18 +1,19 @@
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
-import "../styles/Admin.css";
 
 function AdminLayout({ children }) {
   return (
-    <div className="admin-layout">
+    <div className="min-h-screen bg-gray-100 flex">
 
+      {/* Sidebar */}
       <Sidebar />
 
-      <div className="main-content">
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
 
         <Navbar />
 
-        <main>
+        <main className="flex-1 p-8 overflow-y-auto">
           {children}
         </main>
 

@@ -170,6 +170,79 @@ def create_stop():
         "message": "Stop created successfully",
         "stop": _stop_to_dict(stop)
     }), 201
+# ==========================
+# GET ALL FARES
+# ==========================
+
+@bp.route("/fares", methods=["GET"])
+def get_fares():
+    fares = Fare.query.all()
+
+    return jsonify([
+        {
+            "id": fare.id,
+            "route_id": fare.route_id,
+            "route_name": fare.route.name,
+            "min_fare": fare.min_fare,
+            "max_fare": fare.max_fare,
+            "time_of_day": fare.time_of_day,
+        }
+        for fare in fares
+    ]), 200
+
+
+# ==========================
+# CREATE FARE
+# ==========================
+
+@bp.route("/fares", methods=["POST"])
+def create_fare():
+
+    data = request.get_json()
+
+    required = [
+        "route_id",
+        "min_fare",
+        "max_fare",
+        "time_of_day"
+    ]
+
+    for field in required:
+        if field not in data:
+            return jsonify({
+                "error": f"{field} is required"
+            }), 400
+
+    fare = Fare(
+        route_id=data["route_id"],
+        min_fare=data["min_fare"],
+        max_fare=data["max_fare"],
+        time_of_day=data["time_of_day"]
+    )
+
+    db.session.add(fare)
+    db.session.commit()
+
+    return jsonify({
+        "message": "Fare added successfully."
+    }), 201
+
+
+# ==========================
+# DELETE FARE
+# ==========================
+
+@bp.route("/fares/<int:id>", methods=["DELETE"])
+def delete_fare(id):
+
+    fare = Fare.query.get_or_404(id)
+
+    db.session.delete(fare)
+    db.session.commit()
+
+    return jsonify({
+        "message": "Fare deleted successfully."
+    }), 200
 
 
 # ==========================

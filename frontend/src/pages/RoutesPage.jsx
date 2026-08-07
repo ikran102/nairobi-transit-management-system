@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import MapView from '../components/MapView';
 
 export default function Routes() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeRoute, setActiveRoute] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+const [activeRoute, setActiveRoute] = useState(null);
+const [routes, setRoutes] = useState([]);
+const [loading, setLoading] = useState(true);
 
   const cbdCoordinates = { lat: -1.2833, lng: 36.8233 };
 
@@ -100,6 +102,22 @@ export default function Routes() {
       path: [cbdCoordinates, { lat: -1.3200, lng: 36.8000 }, { lat: -1.3500, lng: 36.7600 }, { lat: -1.3964, lng: 36.7411 }]
     }
   ];
+  useEffect(() => {
+  fetchRoutes();
+}, []);
+
+const fetchRoutes = async () => {
+  try {
+    const response = await fetch("http://127.0.0.1:5000/api/routes");
+    const data = await response.json();
+
+    setRoutes(data);
+    setLoading(false);
+  } catch (err) {
+    console.log(err);
+    setLoading(false);
+  }
+};
 
   const filteredRoutes = popularRoutes.filter(route => 
     route.to.toLowerCase().includes(searchQuery.toLowerCase()) ||
